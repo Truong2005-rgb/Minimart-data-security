@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Đã đăng nhập – {{ issuer }}{% endblock %}
+{% block cls %}wide{% endblock %}
+{% block body %}
+<h1>Đăng nhập thành công <span class="ok">✓</span></h1>
+<p class="sub">Đã qua hai lớp: mật khẩu và mã xác thực.</p>
+<table>
+  <tr><td>Tài khoản đăng nhập</td><td><b>{{ info.login }}</b></td></tr>
+  <tr><td>Người dùng trong database</td><td>{{ info.dbuser }}</td></tr>
+  <tr><td>Vai trò</td><td>{{ info.roles|join(', ') if info.roles else '(không thuộc vai trò nào trong 3 vai trò)' }}</td></tr>
+  {% if info.sales %}
+  <tr><td>Giao dịch nhìn thấy (Fact_Sales)</td><td><b>{{ '{:,}'.format(info.sales.count).replace(',', '.') }}</b></td></tr>
+  <tr><td>Tổng doanh thu nhìn thấy</td><td><b>{{ '{:,}'.format(info.sales.total).replace(',', '.') }}</b></td></tr>
+  {% else %}
+  <tr><td>Fact_Sales</td><td class="bad">Không có quyền đọc<br><small>{{ info.sales_error }}</small></td></tr>
+  {% endif %}
+</table>
+<p class="note">Số liệu trên được truy vấn bằng chính tài khoản vừa đăng nhập nên RBAC và RLS áp dụng như khi dùng SSMS. Phiên tự hết sau {{ idle }} phút không thao tác và tối đa {{ absolute }} giờ kể từ khi đăng nhập.</p>
+<form method="post" action="{{ url_for('logout') }}">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <button class="ghost" type="submit">Đăng xuất</button>
+</form>
+{% endblock %}

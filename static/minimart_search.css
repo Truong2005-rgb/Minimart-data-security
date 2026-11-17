@@ -1,0 +1,8 @@
+/* MINIMART_SEARCH_V1: only presentation, no privilege changes. */
+.mm-search-form,.mm-live-search{display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:#fff;border:1px solid #e5ebf4;border-radius:13px;padding:14px 18px;margin:0 0 18px;box-shadow:0 3px 10px rgba(31,45,80,.025)}
+.mm-search-form label,.mm-live-search label{font-size:13px;font-weight:700;color:#1c3559;white-space:nowrap}
+.mm-search-form input[type=search],.mm-live-search input[type=search]{flex:1 1 240px;min-width:180px;max-width:700px;height:40px;border:1px solid #d5dfec;border-radius:9px;background:#fff;color:#14294a;padding:0 12px;outline:none}
+.mm-search-form input[type=search]:focus,.mm-live-search input[type=search]:focus{border-color:#1c8eac;box-shadow:0 0 0 3px rgba(35,182,185,.13)}
+.mm-live-search{margin:0 20px 16px;box-shadow:none;background:#f8fafc}
+.mm-live-count{font-size:12px;color:#60748f;white-space:nowrap}
+@media(max-width:800px){.mm-search-form,.mm-live-search{gap:9px}.mm-search-form input[type=search],.mm-live-search input[type=search]{flex-basis:100%;max-width:none}.mm-live-search{margin:0 12px 14px}}

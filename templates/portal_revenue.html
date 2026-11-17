@@ -1,0 +1,12 @@
+{% extends 'portal_base.html' %}
+{% block title %}Doanh thu{% endblock %}
+{% block crumb %}Doanh thu{% endblock %}
+{% block content %}
+<div class="page-heading"><div><h1>Hiệu quả doanh thu</h1></div></div>
+<div class="stat-grid three-col"><article class="stat-card"><div class="stat-top"><span>Tổng doanh thu</span><span class="stat-icon blue" data-icon="wallet"></span></div><strong>{{ stats.revenue|vnd }}</strong></article><article class="stat-card"><div class="stat-top"><span>Giao dịch</span><span class="stat-icon teal" data-icon="receipt-text"></span></div><strong>{{ stats.count|num }}</strong></article><article class="stat-card"><div class="stat-top"><span>Số lượng bán</span><span class="stat-icon orange" data-icon="package"></span></div><strong>{{ stats.quantity|num }}</strong></article></div>
+<section class="panel chart-panel"><div class="panel-title"><div><h3>Doanh thu theo ngày</h3></div></div><div class="chart-container tall"><canvas class="revenue-chart" aria-label="Doanh thu từng ngày" role="img"></canvas></div><script type="application/json" class="chart-data">{{ trend|tojson }}</script></section>
+<section class="panel table-panel"><div class="panel-title"><div><h3>Top sản phẩm theo doanh thu</h3></div></div>
+<!-- MINIMART_SEARCH_V1: lọc các hàng đã tải -->
+<div class="mm-live-search"><label for="mm-revenue-search">Tìm trong bảng sản phẩm</label><input type="search" id="mm-revenue-search" data-mm-filter="mm-revenue-table" autocomplete="off" maxlength="100"><span class="mm-live-count" data-mm-count="mm-revenue-table" aria-live="polite"></span></div>
+<div class="table-scroll"><table id="mm-revenue-table" class="data-table"><thead><tr><th>Sản phẩm</th><th>Danh mục</th><th>SL bán</th><th class="right">Doanh thu</th></tr></thead><tbody>{% for p in products %}<tr><td>{{ p.name }}</td><td>{{ p.category }}</td><td>{{ p.qty|num }}</td><td class="right bold">{{ p.revenue|vnd }}</td></tr>{% else %}<tr><td class="empty" colspan="4">Chưa có dữ liệu.</td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}

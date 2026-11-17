@@ -1,0 +1,4 @@
+{% extends 'portal_base.html' %}
+{% block title %}Không thể truy cập{% endblock %}
+{% block crumb %}Không có quyền{% endblock %}
+{% block content %}<div class="error-page"><span class="error-icon" data-icon="shield-alert"></span><span class="error-code">403 / 404</span><h1>Không thể mở trang này</h1><p>{{ reason or 'Bạn không có quyền truy cập tài nguyên này.' }}</p><a class="btn btn-primary" href="{{ url_for('portal_index') if person else url_for('login') }}">Quay về trang được phép</a></div>{% endblock %}

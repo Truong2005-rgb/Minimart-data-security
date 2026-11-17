@@ -1,0 +1,26 @@
+﻿/* TEMPLATE: new encryption material for a separately rebuilt database.
+Copy to sql/local/, fill a NEW master-key password, and review before running.
+Do not use or export private keys from the current demo database.
+*/
+USE [MiniMart_DataWarehouse];
+SET NOCOUNT ON;
+IF DB_NAME() <> N'MiniMart_DataWarehouse'
+    THROW 55101, N'Wrong database.', 1;
+DECLARE @NewMasterPassword nvarchar(128)=N'<SET_NEW_MASTER_KEY_PASSWORD>';
+IF @NewMasterPassword LIKE N'<SET[_]%' OR LEN(@NewMasterPassword)<16
+    THROW 55102, N'Set a new local master-key password of at least 16 characters.', 1;
+IF EXISTS (SELECT 1 FROM sys.symmetric_keys WHERE name IN (N'##MS_DatabaseMasterKey##',N'Key_MiniMart_Customer'))
+   OR EXISTS (SELECT 1 FROM sys.certificates WHERE name=N'Cert_MiniMart_Encryption')
+    THROW 55103, N'Encryption material already exists. Stop; this template must not replace existing keys.', 1;
+IF OBJECT_ID(N'dbo.Dim_Customer',N'U') IS NULL
+    THROW 55104, N'Import the schema into the separate test database first.', 1;
+DECLARE @SQL nvarchar(max)=N'CREATE MASTER KEY ENCRYPTION BY PASSWORD=N'''
+                          +REPLACE(@NewMasterPassword,N'''',N'''''')+N''';';
+EXEC sys.sp_executesql @SQL;
+EXEC sys.sp_executesql N'CREATE CERTIFICATE Cert_MiniMart_Encryption
+    WITH SUBJECT=N''MiniMart portfolio demo encryption'';';
+EXEC sys.sp_executesql N'CREATE SYMMETRIC KEY Key_MiniMart_Customer
+    WITH ALGORITHM=AES_256 ENCRYPTION BY CERTIFICATE Cert_MiniMart_Encryption;';
+EXEC sys.sp_addextendedproperty @name=N'MiniMartPortfolioFreshKeys',@value=N'v1';
+-- This marker identifies only the separate database initialized with this template.
+-- It is not an access-control or security boundary.

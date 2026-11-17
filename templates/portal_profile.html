@@ -1,0 +1,7 @@
+{% extends 'portal_base.html' %}
+{% block title %}Tài khoản{% endblock %}
+{% block crumb %}Tài khoản{% endblock %}
+{% block content %}
+<div class="page-heading"><div><h1>Hồ sơ tài khoản</h1></div></div>
+<div class="content-grid profile-grid"><section class="panel profile-header"><div class="profile-avatar">{{ person.login[:1]|upper }}</div><h2>{{ person.login }}</h2><p>{{ person.db_user }}</p><div class="profile-badges">{% for r in person.roles|sort %}<span class="status-chip">{{ r }}</span>{% endfor %}</div></section><section class="panel profile-details"><h3>Thông tin bảo mật</h3><dl><div><dt>Tên đăng nhập SQL</dt><dd>{{ person.login }}</dd></div><div><dt>Database user</dt><dd>{{ person.db_user }}</dd></div><div><dt>Chi nhánh / Phạm vi</dt><dd>{{ user_scope or 'Theo quyền hiện hành' }}</dd></div><div><dt>Xác thực hai lớp</dt><dd><span class="status-chip">Đã đăng nhập bằng OTP</span></dd></div><div><dt>Quản lý phiên</dt><dd>Hết hạn khi không hoạt động / hết thời lượng tối đa</dd></div></dl><form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn btn-danger" type="submit"><span data-icon="log-out"></span>Đăng xuất khỏi hệ thống</button></form></section></div>
+{% endblock %}

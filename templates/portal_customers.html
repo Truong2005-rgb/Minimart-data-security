@@ -1,0 +1,62 @@
+{% extends 'portal_base.html' %}
+{% block title %}Khách hàng{% endblock %}
+{% block crumb %}Khách hàng{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    
+    <h1>Tra cứu khách hàng</h1>
+    
+  </div>
+  
+</div>
+
+{# MINIMART_SEARCH_V1 customer search #}
+<form class="mm-search-form" method="get" action="{{ url_for('portal_customers') }}" role="search">
+  <label for="mm-customer-q">Tìm khách hàng</label>
+  <input id="mm-customer-q" type="search" name="q" maxlength="100" value="{{ search_query or '' }}" autocomplete="off">
+  <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+  {% if search_query %}<a class="btn btn-muted" href="{{ url_for('portal_customers') }}">Xóa tìm kiếm</a>{% endif %}
+</form>
+
+<section class="panel table-panel">
+  <div class="panel-title">
+    <div>
+      <h3>Danh sách khách hàng</h3>
+      
+    </div>
+  </div>
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>CustomerKey</th>
+          <th>Mã khách hàng</th>
+          <th>Họ và tên</th>
+          <th>Địa chỉ</th>
+          {% if person.is_admin %}
+          <th>Số điện thoại</th>
+          <th>Email</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in items %}
+        <tr>
+          <td>{{ c.CustomerKey }}</td>
+          <td><span class="id-tag">{{ c.CustomerID }}</span></td>
+          <td class="bold">{{ c.CustomerName }}</td>
+          <td>{{ c.Address or '—' }}</td>
+          {% if person.is_admin %}
+          <td>{{ c.Phone or '—' }}</td>
+          <td>{{ c.Email or '—' }}</td>
+          {% endif %}
+        </tr>
+        {% else %}
+        <tr><td colspan="{{ 6 if person.is_admin else 4 }}" class="empty">Không có khách hàng được phép xem.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

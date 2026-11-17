@@ -1,0 +1,54 @@
+﻿/* TEMPLATE: create new demo SQL logins on a separate, clean SQL Server instance.
+Never run on the instance currently used to demonstrate Mini-Mart.
+Copy to sql/local/ first; replace every password placeholder with a new password.
+Do not commit the filled-in copy. No production password or password hash is included.
+Run as the administrator of the NEW instance, before importing database schema.
+*/
+USE [master];
+SET NOCOUNT ON;
+IF DB_ID(N'MiniMart_DataWarehouse') IS NOT NULL
+    THROW 55001, N'MiniMart database already exists. Stop: use a separate clean test instance.', 1;
+DECLARE @NewLogins TABLE (LoginName sysname PRIMARY KEY, NewPassword nvarchar(128));
+INSERT INTO @NewLogins(LoginName, NewPassword) VALUES
+(N'Staff_V6', N'<SET_PASSWORD_Staff_V6>'),
+(N'Staff_Temp3', N'<SET_PASSWORD_Staff_Temp3>'),
+(N'Staff_Temp2', N'<SET_PASSWORD_Staff_Temp2>'),
+(N'Staff_Temp', N'<SET_PASSWORD_Staff_Temp>'),
+(N'Staff_Customer', N'<SET_PASSWORD_Staff_Customer>'),
+(N'RBAC_Test_01', N'<SET_PASSWORD_RBAC_Test_01>'),
+(N'Portal_Service', N'<SET_PASSWORD_Portal_Service>'),
+(N'Portal_Admin', N'<SET_PASSWORD_Portal_Admin>'),
+(N'Manager_ThanhHoa', N'<SET_PASSWORD_Manager_ThanhHoa>'),
+(N'Manager_NgheAn', N'<SET_PASSWORD_Manager_NgheAn>'),
+(N'Manager_HaTinh', N'<SET_PASSWORD_Manager_HaTinh>'),
+(N'Audit_Admin', N'<SET_PASSWORD_Audit_Admin>');
+IF EXISTS (SELECT 1 FROM @NewLogins
+           WHERE NewPassword LIKE N'<SET[_]PASSWORD[_]%' OR LEN(NewPassword) < 12)
+    THROW 55002, N'Fill all placeholders with new local passwords of at least 12 characters.', 1;
+IF EXISTS (SELECT 1 FROM @NewLogins n JOIN sys.server_principals p ON p.name=n.LoginName)
+    THROW 55003, N'A named login already exists. Stop and review; this template does not overwrite accounts.', 1;
+DECLARE @Login sysname, @Password nvarchar(128), @SQL nvarchar(max);
+DECLARE NewLoginCursor CURSOR LOCAL FAST_FORWARD FOR
+    SELECT LoginName, NewPassword FROM @NewLogins ORDER BY LoginName;
+OPEN NewLoginCursor;
+FETCH NEXT FROM NewLoginCursor INTO @Login,@Password;
+BEGIN TRY
+    WHILE @@FETCH_STATUS=0
+    BEGIN
+        SET @SQL=N'CREATE LOGIN '+QUOTENAME(@Login)
+                 +N' WITH PASSWORD=N'''+REPLACE(@Password,N'''',N'''''')
+                 +N''', CHECK_POLICY=ON, CHECK_EXPIRATION=OFF, DEFAULT_DATABASE=[master];';
+        EXEC sys.sp_executesql @SQL;
+        SELECT @Login AS CreatedDemoLogin;
+        FETCH NEXT FROM NewLoginCursor INTO @Login,@Password;
+    END;
+    CLOSE NewLoginCursor;
+    DEALLOCATE NewLoginCursor;
+END TRY
+BEGIN CATCH
+    CLOSE NewLoginCursor;
+    DEALLOCATE NewLoginCursor;
+    THROW;
+END CATCH;
+-- If an error interrupts creation, earlier successful CREATE LOGIN operations may remain.
+-- Do not rerun blindly or overwrite them; inspect the separate test instance first.

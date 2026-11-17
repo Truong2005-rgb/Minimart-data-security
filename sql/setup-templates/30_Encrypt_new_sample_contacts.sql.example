@@ -1,0 +1,37 @@
+﻿/* TEMPLATE: re-encrypt the synthetic sample contacts using the NEW demo key.
+Only for a separately rebuilt database initialized by template 20.
+Old ciphertext from the exported database cannot be decrypted by a different key.
+This script updates only contact ciphertext in the NEW database; never run on the original demo DB.
+*/
+USE [MiniMart_DataWarehouse];
+SET NOCOUNT ON;
+SET XACT_ABORT ON;
+IF DB_NAME() <> N'MiniMart_DataWarehouse'
+    THROW 55201, N'Wrong database.', 1;
+IF NOT EXISTS (SELECT 1 FROM sys.extended_properties
+               WHERE class=0 AND name=N'MiniMartPortfolioFreshKeys' AND CONVERT(nvarchar(20),value)=N'v1')
+    THROW 55202, N'The separate fresh-key setup marker is missing. Stop.', 1;
+IF (SELECT COUNT_BIG(*) FROM dbo.Dim_Customer)<>200
+    THROW 55203, N'Expected 200 synthetic sample customers. Review sample data first.', 1;
+IF EXISTS (SELECT 1 FROM dbo.Dim_Customer WHERE Phone IS NULL OR Email IS NULL)
+    THROW 55204, N'Synthetic plaintext contacts are missing.', 1;
+BEGIN TRY
+    OPEN SYMMETRIC KEY Key_MiniMart_Customer DECRYPTION BY CERTIFICATE Cert_MiniMart_Encryption;
+    BEGIN TRANSACTION;
+    UPDATE dbo.Dim_Customer
+    SET Phone_Encrypted=ENCRYPTBYKEY(KEY_GUID(N'Key_MiniMart_Customer'),CONVERT(nvarchar(20),Phone)),
+        Email_Encrypted=ENCRYPTBYKEY(KEY_GUID(N'Key_MiniMart_Customer'),CONVERT(nvarchar(150),Email));
+    IF EXISTS (SELECT 1 FROM dbo.Dim_Customer
+               WHERE DECRYPTBYKEY(Phone_Encrypted) IS NULL OR DECRYPTBYKEY(Email_Encrypted) IS NULL)
+        THROW 55205, N'New ciphertext validation failed.', 1;
+    COMMIT TRANSACTION;
+    CLOSE SYMMETRIC KEY Key_MiniMart_Customer;
+    SELECT COUNT_BIG(*) AS Customers,COUNT(Phone_Encrypted) AS EncryptedPhones,
+           COUNT(Email_Encrypted) AS EncryptedEmails FROM dbo.Dim_Customer;
+END TRY
+BEGIN CATCH
+    IF XACT_STATE()<>0 ROLLBACK TRANSACTION;
+    IF EXISTS (SELECT 1 FROM sys.openkeys WHERE key_name=N'Key_MiniMart_Customer')
+        CLOSE SYMMETRIC KEY Key_MiniMart_Customer;
+    THROW;
+END CATCH;

@@ -1,0 +1,30 @@
+:root{--bg:#f4f6f9;--card:#fff;--ink:#1d2733;--mute:#5d6b7a;--line:#d9e0e8;--pri:#0b5cad;--pri2:#084a8d;--err:#b3261e;--ok:#1b7a3d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",Roboto,Arial,sans-serif;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:32px;width:100%;max-width:440px;box-shadow:0 6px 24px rgba(20,40,70,.07)}
+.card.wide{max-width:560px}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--mute);margin:0 0 20px;font-size:14px}
+label{display:block;font-weight:600;font-size:14px;margin:14px 0 6px}
+input[type=text],input[type=password]{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+input:focus{outline:2px solid var(--pri);border-color:var(--pri)}
+input.code{letter-spacing:.5em;text-align:center;font-size:24px;font-family:Consolas,monospace}
+button{margin-top:20px;width:100%;padding:12px;border:0;border-radius:8px;background:var(--pri);color:#fff;font-size:16px;font-weight:600;cursor:pointer}
+button:hover{background:var(--pri2)}
+button.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.err{background:#fdecea;color:var(--err);border:1px solid #f4c7c3;padding:10px 12px;border-radius:8px;margin-bottom:8px;font-size:14px}
+.steps{display:flex;gap:8px;margin-bottom:18px;font-size:13px;color:var(--mute)}
+.steps span{flex:1;border-top:3px solid var(--line);padding-top:6px}
+.steps span.on{border-color:var(--pri);color:var(--pri);font-weight:600}
+.qr{text-align:center;margin:12px 0}
+.qr img{width:220px;height:220px;border:1px solid var(--line);border-radius:8px;padding:6px;background:#fff}
+.key{font-family:Consolas,monospace;background:#f1f4f8;border:1px dashed var(--line);border-radius:6px;padding:8px 10px;text-align:center;letter-spacing:.08em;word-break:break-all}
+ol{padding-left:20px;margin:8px 0;color:var(--mute);font-size:14px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:15px}
+td{padding:8px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--mute);width:42%}
+.ok{color:var(--ok);font-weight:600}
+.bad{color:var(--err)}
+.note{font-size:13px;color:var(--mute);margin-top:14px}
+.center{text-align:center}
+.mt{margin-top:14px}
