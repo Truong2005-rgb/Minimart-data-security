@@ -1,0 +1,42 @@
+{% extends 'portal_base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block crumb %}Tổng quan{% endblock %}
+{% block content %}
+<div class="page-heading"><div><h1>Chào mừng trở lại, {{ person.login.replace('Manager_', '') if person.is_manager else person.login }} <span class="wave">✦</span></h1></div></div>
+
+{% if person.is_manager and not person.is_admin %}
+<form class="filter-bar" method="get" action="{{ url_for('portal_dashboard') }}" style="display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:0 0 18px">
+{% if person.is_manager and not person.is_admin %}
+<label for="mm-manager-store">Chi nhánh
+  <select id="mm-manager-store" name="store" style="display:block;min-width:210px;padding:9px;border:1px solid #dbe3ef;border-radius:8px;background:#fff">
+    <option value="all" {% if selected_store == 'all' %}selected{% endif %}>Tất cả chi nhánh được cấp</option>
+    {% for s in manager_stores %}<option value="{{ s }}" {% if selected_store == (s|string) %}selected{% endif %}>{{ store_labels.get(s, 'Chi nhánh #' ~ s) }}</option>{% endfor %}
+  </select>
+</label>
+{% endif %}
+{% if person.is_manager and not person.is_admin %}<button class="btn btn-primary" type="submit">Xem chi nhánh</button>{% endif %}
+</form>
+{% endif %}
+<div class="stat-grid">
+  <article class="stat-card"><div class="stat-top"><span>Tổng doanh thu</span><span class="stat-icon blue" data-icon="wallet"></span></div><strong>{{ stats.revenue|vnd }}</strong></article>
+  <article class="stat-card"><div class="stat-top"><span>Số giao dịch</span><span class="stat-icon teal" data-icon="receipt-text"></span></div><strong>{{ stats.count|num }}</strong></article>
+  <article class="stat-card"><div class="stat-top"><span>Giá trị / giao dịch</span><span class="stat-icon violet" data-icon="chart-column-increasing"></span></div><strong>{{ stats.avg|vnd }}</strong></article>
+  <article class="stat-card"><div class="stat-top"><span>Sản phẩm đã bán</span><span class="stat-icon orange" data-icon="package"></span></div><strong>{{ stats.quantity|num }}</strong></article>
+</div>
+<div class="content-grid">
+  <section class="panel chart-panel"><div class="panel-title"><div><h3>Xu hướng doanh thu</h3></div><span class="panel-badge">VND</span></div>
+    <div class="chart-container"><canvas class="revenue-chart" aria-label="Biểu đồ doanh thu theo ngày" role="img"></canvas></div>
+    <script type="application/json" class="chart-data">{{ trend|tojson }}</script>
+  </section>
+  <section class="panel"><div class="panel-title"><div><h3>Sản phẩm nổi bật</h3></div><a class="simple-link" href="{{ url_for('portal_products') }}">Xem tất cả <span data-icon="arrow-up-right"></span></a></div>
+    <div class="top-products">
+    {% for p in products %}<div class="top-product"><div class="product-rank">{{ '%02d'|format(loop.index) }}</div><div class="top-product-info"><strong title="{{ p.name }}">{{ p.name }}</strong><small>{{ p.qty|num }} sản phẩm</small></div><div class="top-product-value">{{ p.revenue|vnd }}</div></div>{% else %}<p class="muted">Chưa có dữ liệu sản phẩm.</p>{% endfor %}
+    </div>
+  </section>
+</div>
+<section class="panel table-panel"><div class="panel-title"><div><h3>Giao dịch gần đây</h3></div><a class="btn btn-ghost" href="{{ url_for('portal_transactions') }}">Xem toàn bộ <span data-icon="arrow-up-right"></span></a></div>
+  <div class="table-scroll"><table class="data-table"><thead><tr><th>Mã giao dịch</th><th>Ngày</th><th>Cửa hàng</th><th>Mã sản phẩm</th><th>Số lượng</th><th class="right">Doanh thu</th></tr></thead><tbody>
+  {% for t in latest %}<tr><td><span class="id-tag">#{{ t.SalesKey }}</span></td><td>{{ t.date_label }}</td><td>{{ store_labels.get(t.StoreKey, 'Chi nhánh #' ~ t.StoreKey) }}</td><td>SP-{{ t.ProductKey }}</td><td>{{ t.Quantity }}</td><td class="right bold">{{ t.TotalAmount|vnd }}</td></tr>{% else %}<tr><td colspan="6" class="empty">Không có giao dịch trong phạm vi quyền.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endblock %}

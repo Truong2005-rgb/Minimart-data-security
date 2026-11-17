@@ -1,0 +1,14 @@
+{% extends 'portal_base.html' %}
+{% block title %}Giao dịch{% endblock %}
+{% block crumb %}Giao dịch{% endblock %}
+{% block content %}
+<div class="page-heading"><div><h1>Danh sách giao dịch</h1></div><span class="record-chip">{{ result.count|num }} giao dịch</span></div>
+<section class="panel"><form class="filter-bar" method="get" action="{{ url_for('portal_transactions') }}"><div class="filter-label"><span data-icon="sliders-horizontal"></span> Bộ lọc dữ liệu</div><label for="mm-transaction-q">Tìm giao dịch <input id="mm-transaction-q" type="search" name="q" maxlength="80" value="{{ search_query or '' }}"></label><label>Từ ngày <input type="date" name="from" value="{{ start_raw }}"></label><label>Đến ngày <input type="date" name="to" value="{{ end_raw }}"></label><button class="btn btn-primary" type="submit"><span data-icon="search"></span> Áp dụng</button><a class="btn btn-muted" href="{{ url_for('portal_transactions') }}">Xóa lọc</a></form>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Mã giao dịch</th><th>Ngày bán</th><th>Chi nhánh</th><th>Mã SP</th><th>SL</th><th class="right">Doanh thu</th></tr></thead><tbody>
+{% for t in result['items'] %}<tr><td><span class="id-tag">#{{ t.SalesKey }}</span></td><td>{{ t.date_label }}</td><td><span class="status-chip">{{ store_labels.get(t.StoreKey, 'Chi nhánh #' ~ t.StoreKey) }}</span></td><td>SP-{{ t.ProductKey }}</td><td>{{ t.Quantity|num }}</td><td class="right bold">{{ t.TotalAmount|vnd }}</td></tr>{% else %}<tr><td colspan="6" class="empty">Không có giao dịch khớp bộ lọc hoặc quyền của bạn.</td></tr>{% endfor %}
+</tbody></table></div>
+<div class="table-footer"><span>Trang {{ result.page }} / {{ result.pages }} • {{ result.count|num }} kết quả</span><div class="pagination"><a class="btn btn-muted {% if result.page <= 1 %}disabled{% endif %}" href="{{ url_for('portal_transactions', page=result.page-1, **{'from':start_raw,'to':end_raw,'q':search_query}) }}">Trước</a><a class="btn btn-muted {% if result.page >= result.pages %}disabled{% endif %}" href="{{ url_for('portal_transactions', page=result.page+1, **{'from':start_raw,'to':end_raw,'q':search_query}) }}">Sau</a></div></div></section>
+
+{% endblock %}
+
+{# MINIMART_SEARCH_V1 - transaction search is filtered in SQL #}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Đăng nhập – {{ issuer }}{% endblock %}
+{% block body %}
+<div class="steps"><span class="on">1. Mật khẩu</span><span>2. Mã xác thực</span></div>
+<h1>Đăng nhập hệ thống</h1>
+<p class="sub">Kho dữ liệu Mini-mart · xác thực hai lớp</p>
+{% if notice %}<div class="note" role="status">{{ notice }}</div>{% endif %}
+{% if error %}<div class="err" role="alert">{{ error }}</div>{% endif %}
+<form method="post" autocomplete="off">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <label for="u">Tên đăng nhập SQL Server</label>
+  <input id="u" name="username" type="text" maxlength="128" required autofocus>
+  <label for="p">Mật khẩu</label>
+  <input id="p" name="password" type="password" required>
+  <button type="submit">Tiếp tục</button>
+</form>
+<p class="note">Sai {{ max_fails }} lần liên tiếp sẽ bị khóa tạm thời.</p>
+{% endblock %}

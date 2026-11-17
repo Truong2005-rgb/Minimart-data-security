@@ -1,0 +1,79 @@
+{% extends 'portal_base.html' %}
+{% block title %}Kiểm toán{% endblock %}
+{% block crumb %}Nhật ký kiểm toán{% endblock %}
+{% block content %}
+{# MINIMART_AUDIT_VI_START #}
+{% set audit_headers = {
+  'AuditID': 'Mã nhật ký',
+  'EventTime': 'Thời gian',
+  'DatabaseUser': 'Tài khoản',
+  'ActionName': 'Hành động',
+  'ObjectName': 'Đối tượng',
+  'ActionStatus': 'Trạng thái',
+  'Details': 'Chi tiết'
+} %}
+{% set audit_actions = {
+  'VIEW_DASHBOARD': 'Xem Tổng quan',
+  'VIEW_TRANSACTIONS': 'Xem giao dịch',
+  'VIEW_REVENUE': 'Xem doanh thu',
+  'VIEW_PRODUCTS': 'Xem sản phẩm',
+  'VIEW_CUSTOMERS': 'Xem khách hàng',
+  'VIEW_AUDIT': 'Xem nhật ký kiểm toán',
+  'VIEW_ADMIN': 'Xem trang quản trị',
+  'ACCESS_DENIED': 'Truy cập bị từ chối',
+  'LOGIN_SUCCESS': 'Đăng nhập thành công',
+  'LOGIN_FAILED': 'Đăng nhập thất bại',
+  'MFA_SUCCESS': 'Xác thực hai lớp thành công',
+  'MFA_FAILED': 'Xác thực hai lớp thất bại',
+  'SESSION_EXPIRED': 'Phiên làm việc hết hạn',
+  'SESSION_IDLE_EXPIRED': 'Phiên hết hạn do không hoạt động',
+  'SESSION_MAX_EXPIRED': 'Phiên hết thời hạn tối đa'
+} %}
+{% set audit_statuses = {
+  'SUCCESS': 'Thành công',
+  'FAILED': 'Thất bại',
+  'FAIL': 'Thất bại',
+  'DENIED': 'Bị từ chối',
+  'ERROR': 'Lỗi'
+} %}
+{% set audit_detail_labels = {
+  'Truy cap trang Tong quan': 'Truy cập trang Tổng quan',
+  'Truy cap trang Doanh thu': 'Truy cập trang Doanh thu',
+  'Truy cap trang San pham': 'Truy cập trang Sản phẩm',
+  'Truy cap trang Giao dich': 'Truy cập trang Giao dịch',
+  'Truy cap trang Khach hang': 'Truy cập trang Khách hàng',
+  'TEST_ONLY - Kiem tra ghi AuditLog bang Portal_Service': 'KIỂM THỬ - Kiểm tra ghi nhật ký bằng Portal_Service'
+} %}
+{# MINIMART_AUDIT_VI_END #}
+
+<div class="page-heading"><div><h1>Nhật ký kiểm toán</h1></div></div>
+
+{# MINIMART_SEARCH_V1 audit search #}
+{# MINIMART_AUDIT_FOCUS_AND_PAGING_V1 #}
+{# MINIMART_AUDIT_STT_CONTINUOUS_V1: display row index only; never replace SQL AuditID #}
+<form class="mm-search-form" method="get" action="{{ url_for('portal_audit') }}" role="search">
+  <label for="mm-audit-q">Tìm nhật ký</label>
+  <input id="mm-audit-q" type="search" name="q" maxlength="100" value="{{ search_query or '' }}" autocomplete="off">
+  <label for="mm-audit-scope">Loại nhật ký</label>
+  <select id="mm-audit-scope" name="scope" style="height:40px;border:1px solid #d5dfec;border-radius:9px;padding:0 10px;background:white;color:#14294a;">
+    <option value="important" {% if audit_scope == 'important' %}selected{% endif %}>Quan trọng</option>
+    <option value="all" {% if audit_scope == 'all' %}selected{% endif %}>Toàn bộ lịch sử</option>
+  </select>
+  <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+  {% if search_query or audit_scope == 'all' %}<a class="btn btn-muted" href="{{ url_for('portal_audit') }}">Xóa lọc</a>{% endif %}
+</form>
+
+<section class="panel table-panel"><div class="panel-title"><div><h3>Lịch sử hoạt động</h3></div></div><div class="table-scroll"><table class="data-table"><thead><tr><th scope="col">STT</th>{% for k in columns %}<th>{{ audit_headers.get(k, k) }}</th>{% endfor %}</tr></thead><tbody>{% for r in rows %}<tr><td>{{ (audit_page - 1) * 50 + loop.index }}</td>{% for k in columns %}<td>{% if r[k] is none %}—{% elif k == 'ActionName' %}{{ audit_actions.get(r[k], r[k]) }}{% elif k == 'ActionStatus' %}{{ audit_statuses.get(r[k], r[k]) }}{% elif k == 'Details' %}{{ audit_detail_labels.get(r[k], r[k]) }}{% else %}{{ r[k] }}{% endif %}</td>{% endfor %}</tr>{% else %}<tr><td class="empty" colspan="{{ (columns|length or 0) + 1 }}">Chưa có sự kiện trong AuditLog.</td></tr>{% endfor %}</tbody></table></div>
+<div class="table-footer">
+  <span>Tổng {{ audit_total|num }} bản ghi • Trang {{ audit_page }} / {{ audit_pages }}</span>
+  <div class="pagination">
+    {% if audit_page > 1 %}
+      <a class="btn btn-muted" href="{{ url_for('portal_audit', page=audit_page - 1, q=search_query, scope=audit_scope) }}">Trước</a>
+    {% else %}<span class="btn btn-muted disabled">Trước</span>{% endif %}
+    {% if audit_page < audit_pages %}
+      <a class="btn btn-muted" href="{{ url_for('portal_audit', page=audit_page + 1, q=search_query, scope=audit_scope) }}">Sau</a>
+    {% else %}<span class="btn btn-muted disabled">Sau</span>{% endif %}
+  </div>
+</div>
+</section>
+{% endblock %}
