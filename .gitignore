@@ -1,0 +1,22 @@
+# Local secrets and generated runtime keys
+.env
+.env.*
+!.env.example
+data/
+*.key
+*.pem
+*.pfx
+sql/local/
+# Python, IDE and temporary files
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.idea/
+.vscode/
+backup/
+Backup*/
+*.bak
+*.mdf
+*.ldf
+*.sqlaudit
